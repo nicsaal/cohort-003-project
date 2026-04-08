@@ -1,0 +1,77 @@
+import { eq, and, desc } from "drizzle-orm";
+import { db } from "~/db";
+import { courseReviews, users } from "~/db/schema";
+
+export function getReviewsForCourse(courseId: number) {
+  return db
+    .select({
+      id: courseReviews.id,
+      userId: courseReviews.userId,
+      rating: courseReviews.rating,
+      body: courseReviews.body,
+      createdAt: courseReviews.createdAt,
+      userName: users.name,
+      userAvatarUrl: users.avatarUrl,
+    })
+    .from(courseReviews)
+    .leftJoin(users, eq(courseReviews.userId, users.id))
+    .where(eq(courseReviews.courseId, courseId))
+    .orderBy(desc(courseReviews.createdAt))
+    .all();
+}
+
+export function getAverageRatingForCourse(courseId: number): number | null {
+  const reviews = db
+    .select({ rating: courseReviews.rating })
+    .from(courseReviews)
+    .where(eq(courseReviews.courseId, courseId))
+    .all();
+
+  if (reviews.length === 0) return null;
+  const sum = reviews.reduce((acc, r) => acc + r.rating, 0);
+  return Math.round((sum / reviews.length) * 10) / 10;
+}
+
+export function getReviewCountForCourse(courseId: number): number {
+  return db
+    .select({ id: courseReviews.id })
+    .from(courseReviews)
+    .where(eq(courseReviews.courseId, courseId))
+    .all().length;
+}
+
+export function getUserReviewForCourse(userId: number, courseId: number) {
+  return db
+    .select()
+    .from(courseReviews)
+    .where(
+      and(
+        eq(courseReviews.userId, userId),
+        eq(courseReviews.courseId, courseId)
+      )
+    )
+    .get();
+}
+
+export function createOrUpdateReview(
+  userId: number,
+  courseId: number,
+  rating: number,
+  body: string | null
+) {
+  const existing = getUserReviewForCourse(userId, courseId);
+  if (existing) {
+    db.update(courseReviews)
+      .set({ rating, body, updatedAt: new Date().toISOString() })
+      .where(eq(courseReviews.id, existing.id))
+      .run();
+  } else {
+    db.insert(courseReviews).values({ userId, courseId, rating, body }).run();
+  }
+}
+
+export function deleteReview(id: number, userId: number) {
+  db.delete(courseReviews)
+    .where(and(eq(courseReviews.id, id), eq(courseReviews.userId, userId)))
+    .run();
+}
