@@ -15,6 +15,7 @@ import {
   Sun,
   LogOut,
   Settings,
+  BarChart2,
 } from "lucide-react";
 
 interface CurrentUser {
@@ -82,6 +83,12 @@ const navItems: NavItem[] = [
     label: "Categories",
     to: "/admin/categories",
     icon: <Tag className="size-4" />,
+    roles: [UserRole.Admin],
+  },
+  {
+    label: "Analytics",
+    to: "/admin/analytics",
+    icon: <BarChart2 className="size-4" />,
     roles: [UserRole.Admin],
   },
 ];
