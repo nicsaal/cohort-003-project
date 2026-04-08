@@ -17,3 +17,16 @@
 # JetBrains
 /.idea/
 
+# Claude local
+.claude/projects/
+.claude/plugins/
+.claude/backups/
+.claude/cache/
+.claude/downloads/
+.claude/file-history/
+.claude/ide/
+.claude/paste-cache/
+.claude/session-env/
+.claude/sessions/
+.claude/shell-snapshots/
+.claude/plans
