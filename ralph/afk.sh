@@ -12,7 +12,7 @@ stream_text='select(.type == "assistant").message.content[]? | select(.type == "
 # jq filter to extract final result
 final_result='select(.type == "result").result // empty'
 
-for ((i=1; i<=$2; i++)); do
+for ((i=1; i<=$1; i++)); do
   tmpfile=$(mktemp)
   trap "rm -f $tmpfile" EXIT
 
