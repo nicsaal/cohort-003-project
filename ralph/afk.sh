@@ -1,8 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 
-if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "Usage: $0 <plan-and-prd> <iterations>"
+if [ -z "$1" ] ; then
+  echo "Usage: $0 <iterations>"
   exit 1
 fi
 
@@ -17,13 +17,14 @@ for ((i=1; i<=$2; i++)); do
   trap "rm -f $tmpfile" EXIT
 
   commits=$(git log -n 5 --format="%H%n%ad%n%B---" --date=short 2>/dev/null || echo "No commits found")
-  prompt=$(cat ralph/prompt.md)
+  issues=$(gh issue list --state open --json number,title,body,comments)
+  prompt=$(cat ralph/prompt-afk.md)
 
   docker sandbox run claude . -- \
     --verbose \
     --print \
     --output-format stream-json \
-    "Previous commits: $commits Plan and PRD: $1 $prompt" \
+    "Previous commits: $commits $issues $prompt" \
   | grep --line-buffered '^{' \
   | tee "$tmpfile" \
   | jq --unbuffered -rj "$stream_text"
